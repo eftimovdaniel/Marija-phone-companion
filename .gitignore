@@ -1,0 +1,15 @@
+# Тајни клучеви — никогаш на GitHub
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Локална база
+*.db
+*.sqlite
+
+# macOS
+.DS_Store

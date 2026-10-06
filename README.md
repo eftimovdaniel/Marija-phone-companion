@@ -1,1 +1,1 @@
-# Marija-phone-companion
+Marija calls older people, talks with them in Macedonian, and reminds them about their medicine. After each call the family gets a short update. If something is urgent or looks like a scam, they are told right away.

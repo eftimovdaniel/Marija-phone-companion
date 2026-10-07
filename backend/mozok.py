@@ -86,7 +86,7 @@ class Marija:
     def pozdrav(self):
         self.istorija.append({
             "role": "user",
-            "content": "[Повикот започна. Ти ѕвониш, таа крена слушалка. Поздрави ја.]",
+            "content": "[Повикот започна. Ти ѕвониш, таа крена слушалка. Поздрави ја по име, кажи кој си, и прашај што ја мачи. Не спомнувај лекови ниту притисок.]",
         })
         return self._prasaj_ai()
     def odgovori(self, poraka):

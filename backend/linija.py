@@ -6,6 +6,7 @@ import urllib.request
 from dotenv import load_dotenv
 from database import napravi_tabeli, zemi_korisnik, posledni_beleski, zachuvaj_povik
 from glas import teksto_vo_govor
+from izvesti import izvesti_semejstvo
 from mozok import Marija
 from slushaj import govor_vo_tekst
 
@@ -36,6 +37,24 @@ def nova_marija():
     if not profil:
         raise SystemExit("Нема корисник со id 1. Прво стартувај test_baza.py")
     return Marija(profil, "утрински", posledni_beleski(1))
+
+def zavrsi(marija):
+    print("Правам резиме...")
+    try:
+        rezime = marija.napravi_rezime()
+    except Exception as greska:
+        print("Rezimeto padna:", greska)
+        if marija.ima_itno:
+            rezime = "ВНИМАНИЕ: за време на повикот имаше итен случај. Прегледајте го разговорот."
+        elif marija.nastani:
+            rezime = "Имаше важни настани на повикот. Прегледајте го разговорот."
+        else:
+            rezime = "Резимето не можеше да се направи автоматски."
+    povik_id = zachuvaj_povik(marija.profil["id"], "утрински", marija, rezime)
+    print("РЕЗИМЕ ЗА СЕМЕЈСТВОТО:", rezime)
+    print("Повикот е зачуван, id", povik_id)
+    if marija.nastani:
+        izvesti_semejstvo(marija.profil, "РЕЗИМЕ", rezime, rezime)
 
 def simni(url, pateka):
     if not url.endswith(".mp3"):
@@ -104,6 +123,7 @@ class Linija(BaseHTTPRequestHandler):
                 self._xml(twiml(snimi_mp3(f"pak-{call_sid}.mp3", "Не ве слушнав. Кажете уште еднаш.")))
                 return
             if "крај" in tekst.lower():
+                zavrsi(marija)
                 self._xml(twiml(snimi_mp3(f"kraj-{call_sid}.mp3", "Во ред. Пријатен ден."), kraj=True))
                 return
             odgovor = marija.odgovori(tekst)

@@ -4,6 +4,7 @@ import re
 import time
 from dotenv import load_dotenv
 from groq import Groq, GroqError
+from database import zachuvaj_povik
 from izvesti import izvesti_semejstvo
 from prompts import napravi_sistemski_prompt
 
@@ -53,6 +54,17 @@ class Marija:
             "vreme": time.strftime("%H:%M:%S"),
         })
         log.warning("Nastan: %s - %s", tip, tekst)
+    def _kompletira(self, poraki, temperatura, max_tokeni):
+        opcii = {}
+        if "gpt-oss" in MODEL:
+            opcii["reasoning_effort"] = "low"
+        return self.client.chat.completions.create(
+            model=MODEL,
+            messages=poraki,
+            temperature=temperatura,
+            max_tokens=max_tokeni,
+            **opcii,
+        )
     def _izvesti_ednash(self, tip, tekst):
         if tip in self.izvesteni_tipovi:
             return
@@ -64,14 +76,7 @@ class Marija:
     def _prasaj_ai(self):
         pocetok = time.time()
         try:
-            opcii = {}
-            if "gpt-oss" in MODEL:
-                opcii["reasoning_effort"] = "low"
-            odgovor = self.client.chat.completions.create(
-                model=MODEL,
-                messages=self._poraki_za_ai(),
-                temperature=0.7,
-                max_tokens=MAX_TOKENI, **opcii,)
+            odgovor = self._kompletira(self._poraki_za_ai(), 0.7, MAX_TOKENI)
             tekst = ischisti_za_govor(odgovor.choices[0].message.content or "")
             if odgovor.usage:
                 self.vkupno_tokeni += odgovor.usage.total_tokens
@@ -141,15 +146,7 @@ class Marija:
             }
         ]
         try:
-            opcii = {}
-            if "gpt-oss" in MODEL:
-                opcii["reasoning_effort"] = "low"
-            odgovor = self.client.chat.completions.create(
-                model=MODEL,
-                messages=poraki,
-                temperature=0.3,
-                max_tokens=250,**opcii,
-            )
+            odgovor = self._kompletira(poraki, 0.3, 250)
             tekst = (odgovor.choices[0].message.content or "").strip()
             if odgovor.usage:
                 self.vkupno_tokeni += odgovor.usage.total_tokens
@@ -162,3 +159,22 @@ class Marija:
         if self.nastani:
             return "Имаше важни настани на повикот. Прегледајте го разговорот."
         return "Резимето не можеше да се направи автоматски."
+
+def zavrsi_povik(marija, korisnik_id, tip="утрински"):
+    try:
+        rezime = marija.napravi_rezime()
+    except Exception as greska:
+        log.error("Rezimeto padna: %s", greska)
+        if marija.ima_itno:
+            rezime = "ВНИМАНИЕ: за време на повикот имаше итен случај. Прегледајте го разговорот."
+        elif marija.nastani:
+            rezime = "Имаше важни настани на повикот. Прегледајте го разговорот."
+        else:
+            rezime = "Резимето не можеше да се направи автоматски."
+    povik_id = zachuvaj_povik(korisnik_id, tip, marija, rezime)
+    if marija.nastani:
+        try:
+            izvesti_semejstvo(marija.profil, "РЕЗИМЕ", rezime, rezime)
+        except Exception as greska:
+            log.error("Izvestuvanjeto ne uspea: %s", greska)
+    return povik_id, rezime

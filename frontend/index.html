@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Повици</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>Повици</h1>
+    <p class="kogo" id="kogo"></p>
+    <div id="lista"></div>
+  </main>
+  <script>
+    function tekst(s) {
+      return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function datum(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return iso.replace("T", " ").slice(0, 16);
+      return d.toLocaleString("mk-MK", { dateStyle: "medium", timeStyle: "short" });
+    }
+    function prikazi(podatoci) {
+      const kogo = document.getElementById("kogo");
+      const lista = document.getElementById("lista");
+      kogo.textContent = podatoci.ime ? "За " + podatoci.ime : "";
+      const povici = podatoci.povici || [];
+      if (!povici.length) {
+        lista.innerHTML = '<p class="prazno">Уште нема зачувани повици.</p>';
+        return;
+      }
+      lista.innerHTML = povici.map(function (p) {
+        const itno = Number(p.itno) === 1;
+        return (
+          '<article class="' + (itno ? "itno" : "") + '">' +
+            '<div class="red"><span>' + datum(p.pocetok) + "</span>" +
+            (itno ? '<span class="itno-oznaka">Итно</span>' : "<span></span>") +
+            "</div><p>" + tekst(p.rezime || "Нема резиме.") + "</p></article>"
+        );}).join("");
+    }
+    fetch("/povici").then(function (r) { return r.json(); }).then(prikazi).catch(function () {
+        document.getElementById("lista").innerHTML = '<p class="prazno">Не можам да ги вчитам повиците.</p>';
+      });
+  </script>
+</body>
+</html>

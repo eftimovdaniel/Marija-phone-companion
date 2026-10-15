@@ -100,6 +100,15 @@ def zachuvaj_povik(korisnik_id, tip, marija, rezime=""):
             ),
         )
         return kursor.lastrowid
+def zemi_povici(korisnik_id, broj=20):
+    with baza() as kon:
+        redovi = kon.execute(
+            """SELECT id, pocetok, tip, itno, rezime, tokeni FROM povici
+               WHERE korisnik_id = ?
+               ORDER BY pocetok DESC LIMIT ?""",
+            (korisnik_id, broj),
+        ).fetchall()
+        return [dict(r) for r in redovi]
 def posledni_beleski(korisnik_id, broj = 3):
     with baza() as kon:
         redovi = kon.execute (

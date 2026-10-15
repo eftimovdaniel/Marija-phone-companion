@@ -1,8 +1,7 @@
 import logging
 import sys
-from database import napravi_tabeli, zemi_korisnik, posledni_beleski, zachuvaj_povik
-from izvesti import izvesti_semejstvo
-from mozok import Marija
+from database import napravi_tabeli, zemi_korisnik, posledni_beleski
+from mozok import Marija, zavrsi_povik
 logging.basicConfig(level=logging.INFO, format="   [%(levelname)s] %(message)s")
 logging.getLogger("httpx").setLevel(logging.WARNING) 
 
@@ -27,20 +26,7 @@ while True:
         break
     print("Марија:", marija.odgovori(poraka), "\n")
 print("\n--- Повикот заврши. Правам резиме... ---")
-rezime = ""
-try:
-    rezime = marija.napravi_rezime()
-except Exception as greska:
-    logging.getLogger("marija").error("Rezimeto padna: %s", greska)
-    if marija.ima_itno:
-        rezime = "ВНИМАНИЕ: за време на повикот имаше итен случај. Прегледајте го разговорот."
-    elif marija.nastani:
-        rezime = "Имаше важни настани на повикот. Прегледајте го разговорот."
-    else:
-        rezime = "Резимето не можеше да се направи автоматски."
-povik_id = zachuvaj_povik(korisnik_id, tip, marija, rezime)
+povik_id, rezime = zavrsi_povik(marija, korisnik_id, tip)
 print(f"\nРЕЗИМЕ ЗА СЕМЕЈСТВОТО:\n{rezime}")
 print(f"\nИтно: {'ДА' if marija.ima_itno else 'не'} | " f"Настани: {len(marija.nastani)} | Токени: {marija.vkupno_tokeni}")
 print(f"Повикот е зачуван во базата (id {povik_id}).")
-if marija.nastani:
-    izvesti_semejstvo(profil, "РЕЗИМЕ", rezime, rezime)

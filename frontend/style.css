@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  background: #f4f1ea;
+  color: #1c1915;
+  font: 18px/1.45 Georgia, "Times New Roman", serif;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: normal;
+  margin: 0 0 0.25rem;
+}
+
+p.kogo {
+  margin: 0 0 1.5rem;
+  color: #5c564c;
+}
+
+article {
+  background: #fff;
+  border: 1px solid #e4ddd0;
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+article.itno {
+  border-color: #9a3412;
+}
+
+.red {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+  color: #5c564c;
+}
+
+.itno-oznaka {
+  color: #9a3412;
+  font-weight: bold;
+}
+
+article p {
+  margin: 0;
+}
+
+.prazno {
+  color: #5c564c;
+}
